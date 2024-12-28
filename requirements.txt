@@ -1,0 +1,7 @@
+ultralytics
+# mediapipe
+# pytube
+opencv-python-headless
+tqdm
+pytest
+pytest-mock

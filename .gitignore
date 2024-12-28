@@ -1,0 +1,8 @@
+venv/
+app.log
+movie/
+static/output_video.mp4
+*.pt
+*.mov
+.coverage
+.coverage.*

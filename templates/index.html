@@ -1,0 +1,101 @@
+<!-- Start of Selection -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>動画アップロードページ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        #progress-container {
+            display: none;
+            width: 100%;
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        #progress-bar {
+            width: 0;
+            height: 20px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }
+        /* iPhone向けのスタイル */
+        input[type="file"] {
+            font-size: 16px; /* フォントサイズを大きく */
+            padding: 10px; /* パディングを追加 */
+            border-radius: 5px; /* 角を丸く */
+            border: 1px solid #ccc; /* ボーダーを追加 */
+            width: 100%; /* 幅を100%に */
+            box-sizing: border-box; /* ボックスサイズを調整 */
+        }
+        select {
+            font-size: 16px; /* フォントサイズを大きく */
+            padding: 10px; /* パディングを追加 */
+            border-radius: 5px; /* 角を丸く */
+            border: 1px solid #ccc; /* ボーダーを追加 */
+            width: 100%; /* 幅を100%に */
+            box-sizing: border-box; /* ボックスサイズを調整 */
+        }
+    </style>
+    <script>
+        function showProgressBar() {
+            document.getElementById('progress-container').style.display = 'block';
+            var progressBar = document.getElementById('progress-bar');
+            var width = 0;
+            var interval = setInterval(function() {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width++;
+                    progressBar.style.width = width + '%';
+                    progressBar.innerHTML = width + '%';
+                }
+            }, 100); // 100msごとに1%進める
+        }
+
+        // フォーム送信時にプログレスバーを表示する
+        document.addEventListener('DOMContentLoaded', function() {
+            var form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                showProgressBar();
+                // フォーム送信を遅延させる
+                setTimeout(function() {
+                    form.submit();
+                }, 100); // 100ms後にフォームを送信
+                event.preventDefault(); // デフォルトの送信を防ぐ
+            });
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>動画アップロード</h1>
+    </header>
+    <main>
+        <div class="container">
+            <form action="/analyze" method="POST" enctype="multipart/form-data">
+                <label for="video">動画ファイルを選択:</label>
+                <input type="file" id="video" name="video_urls" accept="video/*" required>
+
+                <label for="param">設定を選択:</label>
+                <select id="param" name="param">
+{% for line in lines: %}
+    <option value="{{ line }}">{{ line }} </option>
+{% endfor %}
+                </select>
+                <br/><br/>
+                <button type="submit">アップロード</button>
+            </form>
+            <div id="progress-container">
+                <div id="progress-bar">0%</div>
+            </div>
+            <p>動画をアップロードして分析を開始してください</p>
+        </div>
+    </main>
+</body>
+</html>
+<!-- End of Selection -->

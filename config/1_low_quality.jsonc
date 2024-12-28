@@ -1,0 +1,19 @@
+{
+    "pose_analysis": {
+        "enable": true,  // ポーズ解析を有効にする
+        "model": "yolo11n-pose.pt",  // 使用するモデル
+        "threshold": 0.85,  // 信頼度の閾値
+        "imgsz": 320 // 解析時のサイズ
+    }
+
+    // Frame rate
+    // If not specified, generate the video based on the fps.
+    // , "fps": 10
+
+    // resolutio
+    // If not specified, generate the video with the resolution below
+    // , "resolution": {
+    //     "width": 640,  // Width
+    //     "height": 360  // Height
+    // }  
+}
