@@ -1,20 +1,25 @@
 @echo off
+echo "checking if python is installed..."
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo "pythonがインストールされていません"
+    echo "python is not installed."
     exit /b 1
 )
+echo "python is installed."
 
 REM 仮想環境を作成
 if not exist "venv" (
     python -m venv venv
-    echo "仮想環境を作成しました。"
+    echo "venv environment has been created."
 )
 
-.\venv\Scripts\activate
-pip install -r requirements.txt
+call .\venv\Scripts\activate
 
-echo "ライブラリのロード完了"
+echo "Library loading started"
+rem .\venv\Scripts\python -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
+
+echo "Library loading complete"
 
 REM main.pyを実行
 python main.py
