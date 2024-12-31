@@ -56,9 +56,11 @@ http://(実行マシンのIPアドレス):5002/
 |----|----|----|
 |Intel(R) Core(TM) i5-4300M CPU|yolo11n-pose.pt|10ps|
 |Intel(R) Core(TM) i5-7300U CPU|yolo11n-pose.pt|12ps|
+|Apple M1 Pro|yolo11n-pose.pt|44fps|
 
 ### yolo11x-pose.pt
 |CPU/GPU|モデル|FPS|
 |----|----|----|
 |Intel(R) Core(TM) i5-4300M CPU|yolo11x-pose.pt|1.67fps|
 |Intel(R) Core(TM) i5-7300U CPU|yolo11x-pose.pt|1.55fps|
+|Apple M1 Pro|yolo11x-pose.pt|4.00fps|
