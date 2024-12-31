@@ -51,7 +51,12 @@ http://(実行マシンのIPアドレス):5002/
 設定ファイルの実体はconfiIntel(R) Core(TM) i5-4300M CPU @ 2.60GHz   2.60 GHzgフォルダ以下に配置してある
 
 ## パフォーマンス
-
+### yolo11n-pose.pt
 |CPU/GPU|モデル|FPS|
 |----|----|----|
-|Intel(R) Core(TM) i5-4300M CPU @ 2.60GHz   2.60 GHz|yolo11n-pose.pt|10fps|
+|Intel(R) Core(TM) i5-4300M CPU @ 2.60GHz   2.60 GHz|yolo11n-pose.pt|10ps|
+
+### yolo11x-pose.pt
+|CPU/GPU|モデル|FPS|
+|----|----|----|
+|Intel(R) Core(TM) i5-4300M CPU @ 2.60GHz   2.60 GHz|yolo11x-pose.pt|1.67fps|
