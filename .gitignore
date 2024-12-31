@@ -1,6 +1,6 @@
 venv/
 app.log
-movie/
+movie/temp_video.mp4
 static/output_video.mp4
 *.pt
 *.mov
