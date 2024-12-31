@@ -1,7 +1,8 @@
+
 ultralytics
-# mediapipe
-# pytube
 opencv-python-headless
+flask
 tqdm
-pytest
-pytest-mock
+#pytest
+#pytest-mock
+#mediapipe

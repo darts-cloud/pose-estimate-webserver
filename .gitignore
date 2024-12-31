@@ -6,3 +6,5 @@ static/output_video.mp4
 *.mov
 .coverage
 .coverage.*
+*.pyc
+.vscode

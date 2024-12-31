@@ -28,7 +28,7 @@ class YoloModel():
 
         # キーポイントが存在しない場合は元のフレームを返す
         if len(keypoints) == 0 or keypoints.conf is None:
-            return frame, None
+            return frame
 
         xys = keypoints.xy[0].tolist()# キーポイントの座標をリストに変換
         plottedFrame = result[0].plot(conf=0.9, labels=False, boxes=False)
