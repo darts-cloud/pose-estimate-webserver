@@ -7,11 +7,21 @@
 
 ## インストール
 
-1. リポジトリをクローンします。
+1. Gitをインストール（Windowsのみ）  
+   https://gitforwindows.org/  
+   すでにインストール済みの場合、不要。  
+
+3. pythonをインストール（Windowsのみ）  
+   2024年現在3.13は不安定であるため、3.12以下のインストールを推奨
+   すでにインストール済みの場合、不要。  
+   https://www.python.org/downloads/windows/
+4. リポジトリをクローンします。  
    ```bash
    git clone https://github.com/darts-cloud/pose-estimate-webserver.git
    cd pose-estimate-webserver
    ```
+5. WindowsのみVC＋のライブラリをインストール（Windowsのみ）  
+https://aka.ms/vs/17/release/vc_redist.x64.exe
 
 ## 実行方法
 
@@ -23,3 +33,20 @@
 (mac, linuxの場合)
 ./run.sh
 ```
+## 使用方法
+http://(実行マシンのIPアドレス):5002/
+でアクセスできます。
+
+![image](https://github.com/user-attachments/assets/0e074e82-dc4a-41ed-99b0-140eb88cd73c)
+
+動画ファイルを選択：姿勢推定を行いたい動画を選びます。  
+設定ファイルを選択：設定ファイルを選択します。効果は以下。  
+
+|設定ファイル|解析速度|解析レベル|
+|----|----|----|
+|1_low_quority.jsonc|速い|低|
+|2_middle_quority.jsonc|やや遅い|中|
+|3_high_quority.jsonc|遅い|高|
+
+設定ファイルの実体はconfigフォルダ以下に配置してある
+
