@@ -4,6 +4,7 @@ import nncf
 import openvino as ov
 from openvino.runtime import serialize
 from pose_estimate.model.yolov8_processing import preprocess_image,image_to_tensor
+import os
 
 class DataLoader:
     """指定したディレクトリ内の画像を一つずつ前処理して入力テンソルとして返すイテレータ"""
@@ -36,45 +37,51 @@ class DataLoader:
         label = None 
         return input_tensor,label
     
-def transform_fn(data_item):
-    """ラベルを除いて入力データのみを返す"""
-    return data_item[0]
+class OpenVinoInt8Converter():
+    def __init__(self):
+        pass
 
-# 量子化したいモデルの読み込み
-model_path = r"model/yolo11x-pose_openvino_model/yolo11x-pose.xml"
-core = ov.Core()
-ov_model = core.read_model(model_path)
+    def transform_fn(self, data_item):
+        """ラベルを除いて入力データのみを返す"""
+        return data_item[0]
 
-# データローダー作成
-data_loader= DataLoader("datasets/coco-pose/images/val2017")
+    def convert(self, int8_model_path, original_path):
+        # 量子化したいモデルの読み込み
+        core = ov.Core()
+        ov_model = core.read_model(original_path)
 
-# Dataset作成
-calibration_dataset = nncf.Dataset(data_loader, transform_fn)
+        # データローダー作成
+        data_loader= DataLoader("datasets/coco-pose/images/val2017")
 
-# 量子化しない演算、名称を指定
-# ここでは後処理は量子化しないように指定
-ignored_scope = nncf.IgnoredScope(
-    types=["Multiply", "Subtract", "Sigmoid"],  # 量子化しない演算
-    # names=[
-    #     "/model.22/dfl/conv/Conv",   # 後処理
-    #     "/model.22/Add",
-    #     "/model.22/Add_1",
-    #     "/model.22/Add_2"
-    # ]
-)
+        # Dataset作成
+        calibration_dataset = nncf.Dataset(data_loader, self.transform_fn)
 
-# 量子化の実行
-quantized_pose_model = nncf.quantize(
-    ov_model,
-    calibration_dataset,
-    preset=nncf.QuantizationPreset.MIXED,
-    ignored_scope=ignored_scope
-)
+        # 量子化しない演算、名称を指定
+        # ここでは後処理は量子化しないように指定
+        ignored_scope = nncf.IgnoredScope(
+            types=["Multiply", "Subtract", "Sigmoid"],  # 量子化しない演算
+            # names=[
+            #     "/model.23/dfl/conv/Conv",   # 後処理
+            #     "/model.23/Add",
+            #     "/model.23/Add_1",
+            #     "/model.23/Add_2"
+            # ]
+        )
 
-# 量子化したモデルパス
-int8_model_path = r"model/yolo11x-pose_int8_openvino_model/yolo11x-pose-int8.xml"
+        # 量子化の実行
+        quantized_pose_model = nncf.quantize(
+            ov_model,
+            calibration_dataset,
+            preset=nncf.QuantizationPreset.MIXED,
+            ignored_scope=ignored_scope
+        )
 
-# モデル保存
-serialize(quantized_pose_model, int8_model_path)
+        # int8_model_pathが格納されているディレクトリがなかった場合、ディレクトリを作成
+        directory = os.path.dirname(int8_model_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        # モデル保存
+        serialize(quantized_pose_model, int8_model_path)
 
 

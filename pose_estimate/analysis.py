@@ -1,5 +1,5 @@
 import cv2
-from pose_estimate.model.yolo_openvino import *
+from pose_estimate.model.yolo import *
 from utillity.logger import *
 from tqdm import tqdm
 from pose_estimate.video import *
@@ -30,7 +30,24 @@ class AnalysisVideo():
 
         self._size = (int(self._cap.width), int(self._cap.height))
         
-        self._model = YoloModel(self._pose_model_path, self._size, self._pose_imgsz, self._pose_threshold)
+        self._model = None
+        if self._device in ('openvino'):
+            self._model = YoloOpenVinoModel(self._pose_model_path, 
+                                    self._size, 
+                                    self._pose_imgsz, 
+                                    self._pose_threshold,
+                                    self._original_model_path)
+        elif self._device in ('openvino_int8'):
+            self._model = YoloOpenVinoInt8Model(self._pose_model_path, 
+                                    self._size, 
+                                    self._pose_imgsz, 
+                                    self._pose_threshold,
+                                    self._original_model_path)
+        else:
+            self._model = YoloModel(self._pose_model_path, 
+                                    self._size, 
+                                    self._pose_imgsz, 
+                                    self._pose_threshold)
 
         self._total_frames = int(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
         logger.info(f"Total frames in the video: {self._total_frames}")
@@ -45,6 +62,8 @@ class AnalysisVideo():
         self._pose_threshold = None
         self._pose_imgsz = None
         self._display_video_flg = None
+        self._original_model_path = None
+        self._device = 'cpu'
         if param is not None:
             if 'fps' in param:
                 self._fps = param['fps']
@@ -60,6 +79,11 @@ class AnalysisVideo():
                 self._pose_model_path = param["pose_analysis"]["model"]
                 self._pose_threshold = param["pose_analysis"]["threshold"]
                 self._pose_imgsz = param["pose_analysis"]["imgsz"]
+                if 'original_model' in param["pose_analysis"]:
+                    self._original_model_path = param["pose_analysis"]["original_model"]
+                if 'device' in param["pose_analysis"]:
+                    self._device = param["pose_analysis"]["device"]
+                
             if 'display_video' in param:
                 self._display_video_flg = param["display_video"]
 

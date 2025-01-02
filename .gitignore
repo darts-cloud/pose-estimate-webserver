@@ -1,4 +1,7 @@
 /venv/
+/test/
+/model/
+/datasets/
 app.log
 movie/temp_video.mp4
 static/output_video.mp4
@@ -8,5 +11,3 @@ static/output_video.mp4
 .coverage.*
 *.pyc
 .vscode
-/model/
-/datasets/
