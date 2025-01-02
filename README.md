@@ -69,6 +69,6 @@ http://(実行マシンのIPアドレス):5002/
 |Intel(R) Core(TM) i5-7300U CPU|yolo11x-pose.pt|1.55fps|
 |Intel(R) Core(TM) i5-7300U CPU|yolo11x-pose.pt -> openvino|1.62fps|
 |11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11x-pose.pt|1.40fps|
-|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11x-pose.pt -> openvino|2.84ps|
-|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11x-pose.pt -> openvino(int8)|9.24ps|
+|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11x-pose.pt -> openvino|2.84fps|
+|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11x-pose.pt -> openvino(int8)|9.24fps|
 |Apple M1 Pro|yolo11x-pose.pt|4.00fps|
