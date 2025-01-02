@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 import logging
 import openvino as ov
 from pose_estimate.model.yolov8_processing import *
-from pose_estimate.model.yolov8_processing_faster import *
 import numpy as np
 import os
 from queue import Queue
