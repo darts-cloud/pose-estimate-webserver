@@ -54,11 +54,11 @@ http://(実行マシンのIPアドレス):5002/
 ### yolo11n-pose.pt
 |CPU/GPU|モデル|FPS|
 |----|----|----|
-|Intel(R) Core(TM) i5-4300M CPU|yolo11n-pose.pt|10ps|
-|Intel(R) Core(TM) i5-7300U CPU|yolo11n-pose.pt|12ps|
-|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt|20ps|
-|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino|23ps|
-|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino(int8)|32ps|
+|Intel(R) Core(TM) i5-4300M CPU|yolo11n-pose.pt|10fps|
+|Intel(R) Core(TM) i5-7300U CPU|yolo11n-pose.pt|12fps|
+|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt|20fps|
+|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino|23fps|
+|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino(int8)|33.60fps|
 |Apple M1 Pro|yolo11n-pose.pt|44fps|
 
 ### yolo11x-pose.pt
@@ -68,5 +68,5 @@ http://(実行マシンのIPアドレス):5002/
 |Intel(R) Core(TM) i5-7300U CPU|yolo11x-pose.pt|1.55fps|
 |11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11x-pose.pt|1.40fps|
 |11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11x-pose.pt -> openvino|2.84ps|
-|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11x-pose.pt -> openvino(int8)|10.68ps|
+|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11x-pose.pt -> openvino(int8)|9.24ps|
 |Apple M1 Pro|yolo11x-pose.pt|4.00fps|
