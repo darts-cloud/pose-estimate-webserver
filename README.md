@@ -48,7 +48,7 @@ http://(実行マシンのIPアドレス):5002/
 |2_middle_quority.jsonc|やや遅い|中|
 |3_high_quority.jsonc|遅い|高|
 
-設定ファイルの実体はconfiIntel(R) Core(TM) i5-4300M CPU @ 2.60GHz   2.60 GHzgフォルダ以下に配置してある
+設定ファイルの実体はconfigフォルダ以下に配置してある
 
 ## パフォーマンス
 ### yolo11n-pose.pt
