@@ -1,5 +1,5 @@
 import cv2
-from pose_estimate.model.yolo import *
+from pose_estimate.model.yolo_openvino import *
 from utillity.logger import *
 from tqdm import tqdm
 from pose_estimate.video import *
@@ -73,16 +73,13 @@ class AnalysisVideo():
                 break
             if self._resize_flg:
                 frame = cv2.resize(frame, self._size)
-            frame = self._estimate_pose(frame)
+            fr = self._model.pose_estimation(frame)
+            if fr is not None:
+                frame = fr            
             self._progress_bar.update(1)
             self._cap.write(frame)
         
+        self._model.close()
         self._cap.release()
         cv2.destroyAllWindows()
         # sys.exit(self.app.exec_())
-
-    @logger
-    def _estimate_pose(self, frame):
-        frame = self._model.pose_estimation(frame)
-
-        return frame

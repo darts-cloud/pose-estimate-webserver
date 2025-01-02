@@ -6,3 +6,5 @@ tqdm
 #pytest
 #pytest-mock
 #mediapipe
+openvino==2024.6.0
+nncf
