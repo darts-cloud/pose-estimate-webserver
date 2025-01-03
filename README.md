@@ -33,6 +33,7 @@ https://aka.ms/vs/17/release/vc_redist.x64.exe
 (mac, linuxの場合)
 ./run.sh
 ```
+
 ## 使用方法
 http://(実行マシンのIPアドレス):5002/
 でアクセスできます。
@@ -49,6 +50,13 @@ http://(実行マシンのIPアドレス):5002/
 |3_high_quority.jsonc|遅い|高|
 
 設定ファイルの実体はconfigフォルダ以下に配置してある
+
+## トラブルシューティング
+### Pythonをインストールしているのにpython is not installed.が表示される。
+Pythonをインストールしているのにpython is not installed.が表示される。
+または、Microsoft Storeが開く場合はこちら
+https://loumo.jp/archives/26344
+
 
 ## パフォーマンス
 ### yolo11n-pose.pt
