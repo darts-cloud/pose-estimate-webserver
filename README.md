@@ -53,8 +53,8 @@ http://(実行マシンのIPアドレス):5002/
 
 ## トラブルシューティング
 ### Pythonをインストールしているのにpython is not installed.が表示される。
-Pythonをインストールしているのにpython is not installed.が表示される。
-または、Microsoft Storeが開く場合はこちら
+Pythonをインストールしているのにpython is not installed.が表示される。 
+または、Microsoft Storeが開く場合はこちら  
 https://loumo.jp/archives/26344
 
 
