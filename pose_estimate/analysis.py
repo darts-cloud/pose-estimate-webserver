@@ -36,18 +36,21 @@ class AnalysisVideo():
                                     self._size, 
                                     self._pose_imgsz, 
                                     self._pose_threshold,
-                                    self._original_model_path)
+                                    self._original_model_path,
+                                    self._batch_size)
         elif self._device in ('openvino_int8'):
             self._model = YoloOpenVinoInt8Model(self._pose_model_path, 
                                     self._size, 
                                     self._pose_imgsz, 
                                     self._pose_threshold,
-                                    self._original_model_path)
+                                    self._original_model_path,
+                                    self._batch_size)
         else:
             self._model = YoloModel(self._pose_model_path, 
                                     self._size, 
                                     self._pose_imgsz, 
-                                    self._pose_threshold)
+                                    self._pose_threshold,
+                                    self._batch_size)
 
         self._total_frames = int(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
         logger.info(f"Total frames in the video: {self._total_frames}")
@@ -64,6 +67,7 @@ class AnalysisVideo():
         self._display_video_flg = None
         self._original_model_path = None
         self._device = 'cpu'
+        self._batch_size = 10
         if param is not None:
             if 'fps' in param:
                 self._fps = param['fps']
@@ -83,27 +87,35 @@ class AnalysisVideo():
                     self._original_model_path = param["pose_analysis"]["original_model"]
                 if 'device' in param["pose_analysis"]:
                     self._device = param["pose_analysis"]["device"]
-                
+                if 'batch_size' in param["pose_analysis"]:
+                    self._batch_size = int(param["pose_analysis"]["batch_size"])
             if 'display_video' in param:
                 self._display_video_flg = param["display_video"]
 
     @logger
     def run(self):
+        buf = []
+
         self._progress_bar = tqdm(total=self._total_frames, desc="Processing frames", unit="frame")
-        
+
         while True:
             ret, frame = self._cap.read()
+            if ret:
+                if self._resize_flg:
+                    frame = cv2.resize(frame, self._size)
+                buf.append(frame)
+
+            if len(buf) >= self._batch_size or (not ret and len(buf) > 0):
+                out_frames = self._model.pose_estimation_batch(buf)
+                for of in out_frames:
+                    self._cap.write(of)
+                    self._progress_bar.update(1)
+                buf = []
+
             if not ret:
                 break
-            if self._resize_flg:
-                frame = cv2.resize(frame, self._size)
-            fr = self._model.pose_estimation(frame)
-            if fr is not None:
-                frame = fr            
-            self._progress_bar.update(1)
-            self._cap.write(frame)
         
         self._model.close()
         self._cap.release()
         cv2.destroyAllWindows()
-        # sys.exit(self.app.exec_())
+

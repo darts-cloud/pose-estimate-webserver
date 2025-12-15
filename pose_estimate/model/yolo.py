@@ -23,7 +23,7 @@ class YoloBaseModel(ABC):
 
 class YoloModel(YoloBaseModel):
 
-    def __init__(self, pose_model_path, size, imgsz=None, threshold=0.85):
+    def __init__(self, pose_model_path, size, imgsz=None, threshold=0.85, batch_size=10):
         super().__init__(size, threshold)
 
         # YOLOモデルのパスを取得し、モデルを初期化
@@ -31,10 +31,11 @@ class YoloModel(YoloBaseModel):
         # self._model.to("mps")  # モデルをMPSデバイスに移動
         print(self._model.device)  # 再度デバイス情報を表示
         self._imgsz = imgsz if imgsz is not None else 640
+        self._batch_size = batch_size
     
     def pose_estimation(self, frame):
         # フレームからポーズを推定
-        result = self._model.predict(frame, stream=False, batch=10, imgsz=self._imgsz, conf=self._threshold)
+        result = self._model.predict(frame, stream=False, batch=self._batch_size, imgsz=self._imgsz, conf=self._threshold)
 
         keypoints = result[0].keypoints
 
@@ -42,10 +43,23 @@ class YoloModel(YoloBaseModel):
         if len(keypoints) == 0 or keypoints.conf is None:
             return frame
 
-        xys = keypoints.xy[0].tolist()# キーポイントの座標をリストに変換
+        # xys = keypoints.xy[0].tolist()# キーポイントの座標をリストに変換
         plottedFrame = result[0].plot(conf=0.9, labels=False, boxes=False)
 
         return plottedFrame
+
+    # yolo.py の YoloModel に追加
+    def pose_estimation_batch(self, frames: list):
+        # frames: list of np.ndarray
+        # ultralytics はリストを受け取れて batch を渡せる
+        results = self._model.predict(frames, stream=False, batch=self._batch_size, imgsz=self._imgsz, conf=self._threshold)
+        out = []
+        for i, r in enumerate(results):
+            if len(r.keypoints) == 0 or r.keypoints.conf is None:
+                out.append(frames[i])
+            else:
+                out.append(r.plot(conf=0.9, labels=False, boxes=False))
+        return out
 
     def close(self):
         # self.det.close()
@@ -53,8 +67,9 @@ class YoloModel(YoloBaseModel):
 
 class YoloOpenVinoModel(YoloBaseModel): 
 
-    def __init__(self, pose_model_path, size, imgsz=None, threshold=0.85, original_model=None):
+    def __init__(self, pose_model_path, size, imgsz=None, threshold=0.85, original_model=None, batch_size=1):
         super().__init__(size, threshold)
+        self._batch_size = batch_size
         
         if original_model is not None and \
             not os.path.exists(pose_model_path):
@@ -72,7 +87,7 @@ class YoloOpenVinoModel(YoloBaseModel):
         self._imgsz = imgsz if imgsz is not None else 640
     
     def pose_estimation(self, frame):
-        # フレームからポーズを推定
+        # フレームからポーズを推定（単体処理は既存の detect を利用）
         detections = self.detect(frame, self._model)[0]
         image_with_boxes = draw_results(detections, frame, label_map={0:"person"})
 
@@ -96,14 +111,37 @@ class YoloOpenVinoModel(YoloBaseModel):
         detections = postprocess(pred_boxes=boxes, input_hw=input_hw, orig_img=image)
         return detections
 
+    def pose_estimation_batch(self, frames: list):
+        """
+        バッチ入力で推論を行い、描画済みフレームをリストで返す（INT8モデル版）
+        """
+        pre_imgs = [preprocess_image(f) for f in frames]
+        batch_input = np.stack(pre_imgs, axis=0)  # (N,C,H,W)
+        input_tensor = images_to_tensor(batch_input)  # float32 normalized
+
+        # 推論（バッチ）
+        result = self._model(input_tensor)
+        boxes = result[self._model.output(0)]
+        input_hw = input_tensor.shape[2:]
+
+        # 後処理（orig_img はリストを渡す）
+        detections = postprocess(pred_boxes=boxes, input_hw=input_hw, orig_img=frames)
+
+        # 各フレームに描画して返却
+        out = []
+        for i, det in enumerate(detections):
+            out.append(draw_results(det, frames[i], label_map={0: "person"}))
+        return out
+
     def close(self):
         # self.det.close()
         pass
+    
 
 class YoloOpenVinoInt8Model(YoloBaseModel): 
-
-    def __init__(self, pose_model_path, size, imgsz=None, threshold=0.85, original_model=None):
+    def __init__(self, pose_model_path, size, imgsz=None, threshold=0.85, original_model=None, batch_size=1):
         super().__init__(size, threshold)
+        self._batch_size = batch_size
 
         if original_model is not None and \
             not os.path.exists(pose_model_path):
@@ -119,12 +157,35 @@ class YoloOpenVinoInt8Model(YoloBaseModel):
         self._imgsz = imgsz if imgsz is not None else 640
     
     def pose_estimation(self, frame):
-        # フレームからポーズを推定
+        # フレームからポーズを推定（単体処理は既存の detect を利用）
         detections = self.detect(frame, self._model)[0]
         image_with_boxes = draw_results(detections, frame, label_map={0:"person"})
 
         return image_with_boxes
-    
+
+    def pose_estimation_batch(self, frames: list):
+        """
+        バッチ入力で推論を行い、描画済みフレームをリストで返す
+        """
+        # 前処理: 各フレームを (C,H,W) に変換してスタック -> (N,C,H,W)
+        pre_imgs = [preprocess_image(f) for f in frames]
+        batch_input = np.stack(pre_imgs, axis=0)  # (N,C,H,W)
+        input_tensor = images_to_tensor(batch_input)  # float32 normalized
+
+        # 推論（バッチ）
+        result = self._model(input_tensor)
+        boxes = result[self._model.output(0)]
+        input_hw = input_tensor.shape[2:]
+
+        # 後処理（orig_img はリストを渡す）
+        detections = postprocess(pred_boxes=boxes, input_hw=input_hw, orig_img=frames)
+
+        # 各フレームに描画して返却
+        out = []
+        for i, det in enumerate(detections):
+            out.append(draw_results(det, frames[i], label_map={0: "person"}))
+        return out
+        
     def detect(self, image:np.ndarray, model:ov.Model):
         """
         YOLOv8-pose OpenVINOモデルの推論結果を辞書形式で返す

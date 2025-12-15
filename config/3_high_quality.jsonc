@@ -3,7 +3,8 @@
         "enable": true,  // ポーズ解析を有効にする
         "model": "model/yolo11x-pose.pt",  // 使用するモデル
         "threshold": 0.85,  // 信頼度の閾値
-        "imgsz": 640 // 解析時のサイズ
+        "imgsz": 640, // 解析時のサイズ
+        "batch_size": 8 // バッチサイズ
     }
 
     // Frame rate
