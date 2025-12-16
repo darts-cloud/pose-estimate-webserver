@@ -60,17 +60,17 @@ https://loumo.jp/archives/26344
 
 ## パフォーマンス
 ### yolo11n-pose.pt
-|CPU/GPU|モデル|FPS|
-|----|----|----|
-|Raspberry Pi 4|yolo11n-pose.pt|1.36fps|
-|Intel(R) Core(TM) i5-4300M CPU|yolo11n-pose.pt|10fps|
-|Intel(R) Core(TM) i5-7300U CPU|yolo11n-pose.pt|12fps|
-|Intel(R) Core(TM) i5-7300U CPU|yolo11n-pose.pt -> openvino|15.42fps|
-|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt|20fps|
-|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino|31fps|
-|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino(int8)|38fps|
-|NVIDIA GeForce RTX 3060, 12GB|yolo11n-pose.pt|31fps|
-|Apple M1 Pro|yolo11n-pose.pt|58fps|
+|CPU/GPU|モデル|バッチサイズ|FPS|
+|----|----|----|----|
+|Raspberry Pi 4|yolo11n-pose.pt||1.36fps|
+|Intel(R) Core(TM) i5-4300M CPU|yolo11n-pose.pt||10fps|
+|Intel(R) Core(TM) i5-7300U CPU|yolo11n-pose.pt||12fps|
+|Intel(R) Core(TM) i5-7300U CPU|yolo11n-pose.pt -> openvino||15.42fps|
+|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt||20fps|
+|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino||31fps|
+|11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino(int8)||38fps|
+|NVIDIA GeForce RTX 3060, 12GB|yolo11n-pose.pt||31fps|
+|Apple M1 Pro|yolo11n-pose.pt|13|58fps|
 
 ### yolo11x-pose.pt
 |CPU/GPU|モデル|FPS|
