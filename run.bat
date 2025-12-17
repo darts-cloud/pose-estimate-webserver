@@ -14,16 +14,13 @@ if not exist "venv" (
 )
 
 call .\venv\Scripts\activate
-
 echo "Library loading started"
-cd venv
-Scripts\pip install -r ../requirements.txt
-rem Scripts\pip install flask
-rem python -m pip install -r requirements.txt
+
+pip install -r requirements.txt --index-url https://download.pytorch.org/whl/cu121
 
 echo "Library loading complete"
 
-cd ../
+rem cd ../
 python main.py
 
 pause

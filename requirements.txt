@@ -6,3 +6,7 @@ tqdm
 #pytest
 #pytest-mock
 #mediapipe
+torch --index-url https://download.pytorch.org/whl/cu121
+torchvision
+torchaudio
+onnxruntime-gpu

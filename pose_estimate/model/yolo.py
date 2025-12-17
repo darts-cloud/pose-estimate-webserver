@@ -14,8 +14,9 @@ class YoloModel():
         # YOLOモデルのパスを取得し、モデルを初期化
         self._model = YOLO(pose_model_path)
         # print(self.model.device)  # デバイス情報を表示
-        # self._model.to("mps")  # モデルをMPSデバイスに移動
+        self._model.to("cuda:0")  # モデルをMPSデバイスに移動
         print(self._model.device)  # 再度デバイス情報を表示
+        print(pose_model_path)
         self._size = size  # サイズを設定
         self._threshold = threshold
         self._imgsz = imgsz if imgsz is not None else 640
