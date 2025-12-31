@@ -23,6 +23,10 @@
 5. WindowsのみVC＋のライブラリをインストール（Windowsのみ）  
 https://aka.ms/vs/17/release/vc_redist.x64.exe
 
+6. Windowsで、5.で実行失敗する場合のみビルドツールをインストール（Windowsのみ）  
+https://visualstudio.microsoft.com/visual-cpp-build-tools/
+<img width="1962" height="1128" alt="image" src="https://github.com/user-attachments/assets/c028b90f-7191-4828-8d44-63bab4399cb0" />
+
 ## 実行方法
 
 アプリを実行するには、以下のコマンドを使用します。
