@@ -75,6 +75,7 @@ https://loumo.jp/archives/26344
 |11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt||20fps|
 |11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino||31fps|
 |11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino(int8)||38fps|
+|Intel(R) Core(TM) Ultra 5 135H 3.60 GHz|yolo11n-pose.pt|1|34fps|
 |NVIDIA GeForce RTX 3060, 12GB|yolo11n-pose.pt|40|51fps|
 |Apple M1 Pro|yolo11n-pose.pt|13|58fps|
 
