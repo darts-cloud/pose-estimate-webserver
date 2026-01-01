@@ -24,7 +24,7 @@
 https://aka.ms/vs/17/release/vc_redist.x64.exe
 
 6. Windowsで、5.で実行失敗する場合のみビルドツールをインストール（Windowsのみ）  
-https://visualstudio.microsoft.com/visual-cpp-build-tools/
+https://visualstudio.microsoft.com/visual-cpp-build-tools/  
 インストーラ起動後、C++によるデスクトップ開発にチェック
 <img width="1962" height="1128" alt="image" src="https://github.com/user-attachments/assets/c028b90f-7191-4828-8d44-63bab4399cb0" />
 
