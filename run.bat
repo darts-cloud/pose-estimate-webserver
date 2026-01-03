@@ -22,7 +22,6 @@ rem python -m pip install -r requirements.txt
 
 echo "Library loading complete"
 
-cd ../
 python main.py
 
 pause

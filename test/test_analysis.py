@@ -1,199 +1,99 @@
-from pose_estimate.analysis import AnalysisVideo
-from plugin.darts_throw_plugin import *
-from form import *
+"""AnalysisVideo クラスのテストモジュール。"""
+
+# pyright: reportMissingImports=false
+# pylint: disable=use-of-assert,protected-access
 import pytest
 
-class TestAnalysisVideo():
+from pose_estimate.analysis import AnalysisVideo
+from utillity.jsonUtil import ReadJSONC
 
-    def test_init1(self):
-        input_file = 'test/file/notexistfile.mov'
-        output_file = 'test/file/output.mov'
-        
-        plugins = []  # プラグインのリストを空に設定
+
+class TestAnalysisVideo:
+    """AnalysisVideo クラスのテストクラス。"""
+
+    @pytest.fixture(autouse=True)
+    def setup(self) -> None:
+        """セットアップ処理。"""
+        self.param = ReadJSONC("test/file/1_cpu.jsonc")
+
+    def test_init1(self) -> None:
+        """存在しないファイルでエラーが発生することをテスト。"""
+        input_file = "test/file/notexistfile.mov"
+        output_file = "test/file/output.mp4"
 
         with pytest.raises(FileNotFoundError):
-            video = AnalysisVideo(input_file, output_file, plugins)
+            AnalysisVideo(input_file, output_file, self.param)
 
-    def test_init2(self):
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
-        
-        plugins = []  # プラグインのリストを空に設定
-        video = AnalysisVideo(input_file, output_file, plugins)
+    def test_init2(self) -> None:
+        """正常な初期化をテスト。"""
+        input_file = "test/file/input.mp4"
+        output_file = "test/file/output.mp4"
 
-        assert video._fps == pytest.approx(60, 1.0)
-        assert video._size == (640, 360)
-        assert video._plugins == plugins
+        video = AnalysisVideo(input_file, output_file, self.param)
 
-    def test_run_0(self):
-        # モックの設定
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
+        assert video._fps == pytest.approx(60, 1.0)  # noqa: S101,SLF001
+        assert video._size == (1280, 720)  # noqa: S101,SLF001
 
-        video = AnalysisVideo(input_file, output_file, plugins)
+    def test_run1(self, mocker) -> None:  # noqa: ANN001
+        """runメソッドの実行をテスト。"""
+        input_file = "test/file/input.mp4"
+        output_file = "test/file/output.mp4"
 
-        # runメソッドを実行
-        video.run()
+        video = AnalysisVideo(input_file, output_file, self.param)
 
-    def test_run_1(self):
-        # モックの設定
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
+        # モデルのcloseメソッドをモック
+        mocker.patch.object(
+            video._model,  # noqa: SLF001
+            "close",
+        )
 
-        video = AnalysisVideo(input_file, output_file, plugins)
-
-        # runメソッドを実行
-        video.run()
-
-    def test_run_2(self, mocker):
-        # モックの設定
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
-
-        plugins = [darts_throw_plugin()]  # プラグインを設定
-        video = AnalysisVideo(input_file, output_file, plugins)
-        
-        # _process_frameメソッドがFalseを返すようにするために、モックを設定します。
-        mocker.patch.object(video, '_process_frame', return_value=False)
-        mocker.patch.object(video, '_merge_videos', return_value=False)
+        # モデルのpose_estimation_batchをモック
+        mock_batch_result = [video._cap.read()[1] for _ in range(5)]  # noqa: SLF001
+        mocker.patch.object(
+            video._model,  # noqa: SLF001
+            "pose_estimation_batch",
+            return_value=mock_batch_result,
+        )
 
         # runメソッドを実行
         video.run()
 
-    def test_estimate_pose1(self):
-        # _estimate_poseメソッドのテスト
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
+        # モデルのcloseが呼ばれたことを確認
+        video._model.close.assert_called_once()  # noqa: SLF001
 
-        plugins = []  # プラグインのリストを空に設定
-        video = AnalysisVideo(input_file, output_file, plugins)
-        video._pose_enable_flg = False
+    def test_run_cpu(self) -> None:
+        """runメソッドの実行をテスト。"""
+        param = ReadJSONC("test/file/1_cpu.jsonc")
+        input_file = "test/file/input.mp4"
+        output_file = "test/file/output.mp4"
 
-        # フレームをモック
-        ret, frame = video._cap.read()
-        assert ret
+        video = AnalysisVideo(input_file, output_file, param)
 
-        # _estimate_poseメソッドを実行
-        df, processed_frame = video._estimate_pose(frame)
+        # runメソッドを実行
+        video.run()
 
-        # 結果の確認
-        assert df is None
-        assert processed_frame.shape == frame.shape
+    def test_run_openvino(self) -> None:
+        """runメソッドの実行をテスト。"""
+        param = ReadJSONC("test/file/2_openvino.jsonc")
+        input_file = "test/file/input.mp4"
+        output_file = "test/file/output.mp4"
 
-    def test_estimate_pose2(self, mocker):
-        # _estimate_poseメソッドのテスト
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
-        
-        plugins = []  # プラグインのリストを空に設定
-        video = AnalysisVideo(input_file, output_file, plugins)
-        video._pose_enable_flg = True
-        
-        # フレームをモック
-        ret, frame = video._cap.read()
-        assert ret
+        video = AnalysisVideo(input_file, output_file, param)
 
-         # modelのモックを設定
-        mocker.patch('pose_estimate.model.yolo.Yolo11nModel.pose_estimation', return_value=frame)
-        
-        # _estimate_poseメソッドを実行
-        df, processed_frame = video._estimate_pose(frame)
+        # runメソッドを実行
+        video.run()
 
-        # 結果の確認
-        assert df is not None
-        assert processed_frame.shape == frame.shape
+    def test_run_openvino_int8(self) -> None:
+        """runメソッドの実行をテスト。"""
+        param = ReadJSONC("test/file/3_openvino_int8.jsonc")
+        input_file = "test/file/input.mp4"
+        output_file = "test/file/output.mp4"
 
-    def test_process_frame1(self):
-        # _process_frameメソッドのテスト
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
+        video = AnalysisVideo(input_file, output_file, param)
 
-        plugins = [darts_throw_plugin()]  # プラグインのリストを設定
-        video = AnalysisVideo(input_file, output_file, plugins)
-
-        # フレームをモック
-        rt, frame = video._cap.read()
-        video._pose_enable_flg = False
-        df = DartsForm()
-
-        # _process_frameメソッドを実行
-        result = video._process_frame(frame, df)
-
-        # 結果の確認
-        assert result
-
-    def test_process_frame2(self, mocker):
-        # _process_frameメソッドのテスト
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
-
-        plugins = [test_pligin()]  # プラグインのリストを設定
-        video = AnalysisVideo(input_file, output_file, plugins)
-
-        # フレームをモック
-        rt, frame = video._cap.read()
-        df = DartsForm()
-
-        # _process_frameメソッドを実行
-        result = video._process_frame(frame, df)
-
-        # 結果の確認
-        assert result
-        
-    def test_merge_videos1(self, mocker):
-        # _merge_videosメソッドのテスト
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
-
-        # プラグインのモックを設定
-        mock_plugin = mocker.MagicMock()
-        plugins = [mock_plugin]        
-        video = AnalysisVideo(input_file, output_file, plugins)
-
-        combined_frames = []
-        while True:
-            ret, frame = video._cap.read()
-            if not ret:
-                break
-            combined_frames.append(frame)
-
-        mock_plugin.merge_videos.return_value = combined_frames  # モックフレームを返す
-
-        # _merge_videosメソッドを実行
-        video._merge_videos()
-
-        # merge_videosが呼ばれたことを確認
-        mock_plugin.merge_videos.assert_called_once()
-        # 出力ビデオにフレームが書き込まれたことを確認
-        # self.assertTrue(mock_video_writer.write.called)
-        
-    def test_merge_videos2(self, mocker):
-        # _merge_videosメソッドのテスト
-        input_file = 'test/file/input.mov'
-        output_file = 'test/file/output.mov'
-
-        # プラグインのモックを設定
-        plugins = [test_pligin()]
-        video = AnalysisVideo(input_file, output_file, plugins)
-
-        combined_frames = []
-        while True:
-            ret, frame = video._cap.read()
-            if not ret:
-                break
-            combined_frames.append(frame)
-
-        # _merge_videosメソッドを実行
-        video._merge_videos()
+        # runメソッドを実行
+        video.run()
 
 
-class test_pligin(orbit_plugin):
-
-    def __init__(self):
-        super().__init__()
-
-    def run(self, frame):
-        return None
-
-if __name__ == '__main__': # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     pytest.main()

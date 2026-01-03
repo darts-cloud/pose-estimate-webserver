@@ -5,8 +5,7 @@
         "original_model": "model/yolo11n-pose.pt",  // 変更元のモデルを指定
         "threshold": 0.85,  // 信頼度の閾値
         "imgsz": 320, // 解析時のサイズ
-        "device": "openvino", // cpu, openvino, openvino_int8
-        "batch_size": 16 // バッチサイズ
+        "device": "openvino" // cpu, openvino, openvino_int8
     }
 
     // Frame rate

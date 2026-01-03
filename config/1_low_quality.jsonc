@@ -4,7 +4,7 @@
         "model": "model/yolo11n-pose.pt",  // 使用するモデル
         "threshold": 0.85,  // 信頼度の閾値
         "imgsz": 320, // 解析時のサイズ
-        "batch_size": 8 // バッチサイズ
+        "batch_size": 16 // バッチサイズ
     }
 
     // Frame rate

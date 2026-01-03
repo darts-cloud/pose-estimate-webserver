@@ -1,16 +1,24 @@
 import cv2
 import numpy as np
-from typing import Tuple,Dict
 import torch
 from ultralytics.utils import ops
 from ultralytics.utils.plotting import colors
 
-def letterbox(img: np.ndarray, new_shape:Tuple[int, int] = (640, 640), color:Tuple[int, int, int] = (114, 114, 114), auto:bool = False, scale_fill:bool = False, scaleup:bool = False, stride:int = 32):
-    """
-    Resize image and padding for detection. Takes image as input, 
+
+def letterbox(
+    img: np.ndarray,
+    new_shape: tuple[int, int] = (640, 640),
+    color: tuple[int, int, int] = (114, 114, 114),
+    auto: bool = False,
+    scale_fill: bool = False,
+    scaleup: bool = False,
+    stride: int = 32,
+):
+    """Resize image and padding for detection. Takes image as input,
     resizes image to fit into new shape with saving original aspect ratio and pads it to meet stride-multiple constraints
-    
-    Parameters:
+
+    Parameters
+    ----------
       img (np.ndarray): image for preprocessing
       new_shape (Tuple(int, int)): image size after preprocessing in format [height, width]
       color (Tuple(int, int, int)): color for filling padded area
@@ -22,8 +30,8 @@ def letterbox(img: np.ndarray, new_shape:Tuple[int, int] = (640, 640), color:Tup
       img (np.ndarray): image after preprocessing
       ratio (Tuple(float, float)): hight and width scaling ratio
       padding_size (Tuple(int, int)): height and width padding size
-    
-    
+
+
     """
     # Resize and pad image while meeting stride-multiple constraints
     shape = img.shape[:2]  # current shape [height, width]
@@ -53,76 +61,91 @@ def letterbox(img: np.ndarray, new_shape:Tuple[int, int] = (640, 640), color:Tup
         img = cv2.resize(img, new_unpad, interpolation=cv2.INTER_LINEAR)
     top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
     left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
-    img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
+    img = cv2.copyMakeBorder(
+        img,
+        top,
+        bottom,
+        left,
+        right,
+        cv2.BORDER_CONSTANT,
+        value=color,
+    )  # add border
     return img, ratio, (dw, dh)
 
 
 def preprocess_image(img0: np.ndarray):
-    """
-    Preprocess image according to YOLOv8 input requirements. 
+    """Preprocess image according to YOLOv8 input requirements.
     Takes image in np.array format, resizes it to specific size using letterbox resize and changes data layout from HWC to CHW.
-    
-    Parameters:
+
+    Parameters
+    ----------
       img0 (np.ndarray): image for preprocessing
     Returns:
       img (np.ndarray): image after preprocessing
+
     """
     # resize
     img = letterbox(img0)[0]
-    
+
     # Convert HWC to CHW
     img = img.transpose(2, 0, 1)
     img = np.ascontiguousarray(img)
     return img
 
-def image_to_tensor(image:np.ndarray):
-    """
-    Preprocess image according to YOLOv8 input requirements. 
+
+def image_to_tensor(image: np.ndarray):
+    """Preprocess image according to YOLOv8 input requirements.
+
     Takes image in np.array format, resizes it to specific size using letterbox resize and changes data layout from HWC to CHW.
-    
-    Parameters:
+
+    Parameters
+    ----------
       img (np.ndarray): image for preprocessing
     Returns:
-      input_tensor (np.ndarray): input tensor in NCHW format with float32 values in [0, 1] range 
+      input_tensor (np.ndarray): input tensor in NCHW format with float32 values in [0, 1] range
+
     """
     input_tensor = image.astype(np.float32)  # uint8 to fp32
     input_tensor /= 255.0  # 0 - 255 to 0.0 - 1.0
-    
+
     # add batch dimension
     if input_tensor.ndim == 3:
         input_tensor = np.expand_dims(input_tensor, 0)
     return input_tensor
 
 
-def images_to_tensor(images:np.ndarray):
-    """
-    静的バッチ推論用
-    Preprocess image according to YOLOv8 input requirements. 
+def images_to_tensor(images: np.ndarray):
+    """静的バッチ推論用
+
+    Preprocess image according to YOLOv8 input requirements.
     Takes image in np.array format, resizes it to specific size using letterbox resize and changes data layout from NHWC to NCHW.
-    
-    Parameters:
+
+    Parameters
+    ----------
       img (np.ndarray): image for preprocessing NCHW
     Returns:
-      input_tensor (np.ndarray): input tensor in NCHW format with float32 values in [0, 1] range 
+      input_tensor (np.ndarray): input tensor in NCHW format with float32 values in [0, 1] range
+
     """
     input_tensor = images.astype(np.float32)  # uint8 to fp32
     input_tensor /= 255.0  # 0 - 255 to 0.0 - 1.0
-    
+
     return input_tensor
 
 
 def postprocess(
-    pred_boxes:np.ndarray, 
-    input_hw:Tuple[int, int], 
-    orig_img:np.ndarray, 
-    min_conf_threshold:float = 0.25, 
-    nms_iou_threshold:float = 0.45, 
-    agnosting_nms:bool = False, 
-    max_detections:int = 80,
+    pred_boxes: np.ndarray,
+    input_hw: tuple[int, int],
+    orig_img: np.ndarray,
+    min_conf_threshold: float = 0.25,
+    nms_iou_threshold: float = 0.45,
+    agnosting_nms: bool = False,
+    max_detections: int = 80,
 ):
-    """
-    YOLOv8 model postprocessing function. Applied non maximum supression algorithm to detections and rescale boxes to original image size
-    Parameters:
+    """YOLOv8 model postprocessing function. Applied non maximum supression algorithm to detections and rescale boxes to original image size
+
+    Parameters
+    ----------
         pred_boxes (np.ndarray): model output prediction boxes
         input_hw (np.ndarray): preprocessed image
         orig_image (np.ndarray): image before preprocessing
@@ -131,16 +154,17 @@ def postprocess(
         agnostic_nms (bool, *optiona*, False): apply class agnostinc NMS approach or not
         max_detections (int, *optional*, 300):  maximum detections after NMS
     Returns:
-       pred (List[Dict[str, np.ndarray]]): list of dictionary with det - detected boxes in format [x1, y1, x2, y2, score, label] and 
+       pred (List[Dict[str, np.ndarray]]): list of dictionary with det - detected boxes in format [x1, y1, x2, y2, score, label] and
                                            kpt - 17 keypoints in format [x1, y1, score1]
+
     """
-    nms_kwargs = {"agnostic": agnosting_nms, "max_det":max_detections}
+    nms_kwargs = {"agnostic": agnosting_nms, "max_det": max_detections}
     preds = ops.non_max_suppression(
         torch.from_numpy(pred_boxes),
         min_conf_threshold,
         nms_iou_threshold,
         nc=1,
-        **nms_kwargs
+        **nms_kwargs,
     )
 
     results = []
@@ -149,17 +173,27 @@ def postprocess(
     for i, pred in enumerate(preds):
         shape = orig_img[i].shape if isinstance(orig_img, list) else orig_img.shape
         pred[:, :4] = ops.scale_boxes(input_hw, pred[:, :4], shape).round()
-        pred_kpts = pred[:, 6:].view(len(pred), *kpt_shape) if len(pred) else pred[:, 6:]
+        pred_kpts = (
+            pred[:, 6:].view(len(pred), *kpt_shape) if len(pred) else pred[:, 6:]
+        )
         pred_kpts = ops.scale_coords(input_hw, pred_kpts, shape)
-        results.append({"box": pred[:, :6].numpy(), 'kpt': pred_kpts.numpy()})
-    
+        results.append({"box": pred[:, :6].numpy(), "kpt": pred_kpts.numpy()})
+
     return results
 
 
-def plot_one_box(box:np.ndarray, img:np.ndarray, color:Tuple[int, int, int] = None, keypoints:np.ndarray = None, label:str = None, line_thickness:int = 5):
-    """
-    Helper function for drawing single bounding box on image
-    Parameters:
+def plot_one_box(
+    box: np.ndarray,
+    img: np.ndarray,
+    color: tuple[int, int, int] = None,
+    keypoints: np.ndarray = None,
+    label: str = None,
+    line_thickness: int = 5,
+):
+    """Helper function for drawing single bounding box on image
+
+    Parameters
+    ----------
         box (np.ndarray): bounding box coordinates in format [x1, y1, x2, y2]
         img (no.ndarray): input image
         color (Tuple[int, int, int], *optional*, None): color in BGR format for drawing box, if not specified will be selected randomly
@@ -167,10 +201,13 @@ def plot_one_box(box:np.ndarray, img:np.ndarray, color:Tuple[int, int, int] = No
                                                   if not provided, only box will be drawn
         label (str, *optonal*, None): box label string, if not provided will not be provided as drowing result
         line_thickness (int, *optional*, 5): thickness for box drawing lines
+
     """
     img = img.copy()
     # Plots one bounding box on image img
-    tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
+    tl = (
+        line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1
+    )  # line/font thickness
     color = color or [np.random.randint(0, 255) for _ in range(3)]
     c1, c2 = (int(box[0]), int(box[1])), (int(box[2]), int(box[3]))
     cv2.rectangle(img, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
@@ -179,12 +216,44 @@ def plot_one_box(box:np.ndarray, img:np.ndarray, color:Tuple[int, int, int] = No
         t_size = cv2.getTextSize(label, 0, fontScale=tl / 3, thickness=tf)[0]
         c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
         cv2.rectangle(img, c1, c2, color, -1, cv2.LINE_AA)  # filled
-        cv2.putText(img, label, (c1[0], c1[1] - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
+        cv2.putText(
+            img,
+            label,
+            (c1[0], c1[1] - 2),
+            0,
+            tl / 3,
+            [225, 255, 255],
+            thickness=tf,
+            lineType=cv2.LINE_AA,
+        )
     if keypoints is not None:
-        kpt_color = colors.pose_palette[[16, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 9, 9, 9, 9, 9, 9]]
-        skeleton = [[16, 14], [14, 12], [17, 15], [15, 13], [12, 13], [6, 12], [7, 13], [6, 7], [6, 8],
-                    [7, 9], [8, 10], [9, 11], [2, 3], [1, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7]]
-        limb_color = colors.pose_palette[[9, 9, 9, 9, 7, 7, 7, 0, 0, 0, 0, 0, 16, 16, 16, 16, 16, 16, 16]]
+        kpt_color = colors.pose_palette[
+            [16, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 9, 9, 9, 9, 9, 9]
+        ]
+        skeleton = [
+            [16, 14],
+            [14, 12],
+            [17, 15],
+            [15, 13],
+            [12, 13],
+            [6, 12],
+            [7, 13],
+            [6, 7],
+            [6, 8],
+            [7, 9],
+            [8, 10],
+            [9, 11],
+            [2, 3],
+            [1, 2],
+            [1, 3],
+            [2, 4],
+            [3, 5],
+            [4, 6],
+            [5, 7],
+        ]
+        limb_color = colors.pose_palette[
+            [9, 9, 9, 9, 7, 7, 7, 0, 0, 0, 0, 0, 16, 16, 16, 16, 16, 16, 16]
+        ]
         shape = img.shape[:2]
         for i, k in enumerate(keypoints):
             color_k = [int(x) for x in kpt_color[i]]
@@ -193,7 +262,14 @@ def plot_one_box(box:np.ndarray, img:np.ndarray, color:Tuple[int, int, int] = No
                 if len(k) == 3:
                     if k[2] < 0.5:
                         continue
-                cv2.circle(img, (int(x_coord), int(y_coord)), 5, color_k, -1, lineType=cv2.LINE_AA)
+                cv2.circle(
+                    img,
+                    (int(x_coord), int(y_coord)),
+                    5,
+                    color_k,
+                    -1,
+                    lineType=cv2.LINE_AA,
+                )
 
         ndim = keypoints.shape[-1]
         for i, sk in enumerate(skeleton):
@@ -204,18 +280,34 @@ def plot_one_box(box:np.ndarray, img:np.ndarray, color:Tuple[int, int, int] = No
                 conf2 = keypoints[(sk[1] - 1), 2]
                 if conf1 < 0.5 or conf2 < 0.5:
                     continue
-            if pos1[0] % shape[1] == 0 or pos1[1] % shape[0] == 0 or pos1[0] < 0 or pos1[1] < 0:
+            if (
+                pos1[0] % shape[1] == 0
+                or pos1[1] % shape[0] == 0
+                or pos1[0] < 0
+                or pos1[1] < 0
+            ):
                 continue
-            if pos2[0] % shape[1] == 0 or pos2[1] % shape[0] == 0 or pos2[0] < 0 or pos2[1] < 0:
+            if (
+                pos2[0] % shape[1] == 0
+                or pos2[1] % shape[0] == 0
+                or pos2[0] < 0
+                or pos2[1] < 0
+            ):
                 continue
-            cv2.line(img, pos1, pos2, [int(x) for x in limb_color[i]], thickness=2, lineType=cv2.LINE_AA)
+            cv2.line(
+                img,
+                pos1,
+                pos2,
+                [int(x) for x in limb_color[i]],
+                thickness=2,
+                lineType=cv2.LINE_AA,
+            )
 
     return img
 
 
-def draw_results(results:Dict, source_image:np.ndarray, label_map:Dict):
-    """
-    Helper function for drawing bounding boxes on image
+def draw_results(results: dict, source_image: np.ndarray, label_map: dict):
+    """Helper function for drawing bounding boxes on image
     Parameters:
         image_res (np.ndarray): detection predictions in format [x1, y1, x2, y2, score, label_id]
         source_image (np.ndarray): input image for drawing
@@ -227,7 +319,14 @@ def draw_results(results:Dict, source_image:np.ndarray, label_map:Dict):
     for idx, (*xyxy, conf, lbl) in enumerate(boxes):
         if conf < 0.4:
             continue
-        label = f'{label_map[0]} {conf:.2f}'
+        label = f"{label_map[0]} {conf:.2f}"
         kp = keypoints[idx] if keypoints is not None else None
-        source_image = plot_one_box(xyxy, source_image, keypoints=kp, label=label, color=colors(int(lbl)), line_thickness=1)
+        source_image = plot_one_box(
+            xyxy,
+            source_image,
+            keypoints=kp,
+            label=label,
+            color=colors(int(lbl)),
+            line_thickness=1,
+        )
     return source_image

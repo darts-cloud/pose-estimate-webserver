@@ -1,12 +1,11 @@
 {
     "pose_analysis": {
         "enable": true,  // ポーズ解析を有効にする
-        "model": "model/yolo11n-pose_openvino_model/yolo11n-pose.xml",  // 使用するモデル
-        "original_model": "model/yolo11n-pose.pt",  // 変更元のモデルを指定
+        "model": "model/yolo11n-pose_openvino_model_int8/yolo11n-pose.xml",  // 使用するモデル
+        "original_model": "model/yolo11n-pose_openvino_model/yolo11n-pose.xml",  // 変更元のモデルを指定
         "threshold": 0.85,  // 信頼度の閾値
         "imgsz": 320, // 解析時のサイズ
-        "device": "openvino", // cpu, openvino, openvino_int8
-        "batch_size": 16 // バッチサイズ
+        "device": "openvino_int8" // cpu, openvino, openvino_int8
     }
 
     // Frame rate
