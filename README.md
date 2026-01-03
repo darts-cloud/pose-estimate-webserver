@@ -71,7 +71,7 @@ https://loumo.jp/archives/26344
 |Intel(R) Core(TM) i5-4300M CPU|yolo11n-pose.pt||10fps|
 |Intel(R) Core(TM) i5-7300U CPU|yolo11n-pose.pt||12fps|
 |Intel(R) Core(TM) i5-7300U CPU|yolo11n-pose.pt -> openvino||15.42fps|
-|Intel(R) Core(TM) i5-8500 CPU|yolo11n-pose.pt|1|11fps|
+|Intel(R) Core(TM) i5-8500 CPU|yolo11n-pose.pt|16|13fps|
 |Intel(R) Core(TM) i5-8500 CPU|yolo11n-pose.pt -> openvino|16|21fps|
 |11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt||20fps|
 |11th Gen Intel(R) Core(TM) i5-1135G7 CPU|yolo11n-pose.pt -> openvino||31fps|
